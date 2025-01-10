@@ -1,4 +1,4 @@
-module github.com/lghtr35/llm-wrapping
+module github.com/lghtr35/llm-wrap
 
 go 1.23.4
 

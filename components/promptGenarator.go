@@ -3,7 +3,7 @@ package components
 import (
 	"fmt"
 
-	"github.com/lghtr35/llm-wrapping/models"
+	"github.com/lghtr35/llm-wrap/models"
 )
 
 type PromptGenerator struct {

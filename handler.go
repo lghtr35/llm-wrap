@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/lghtr35/llm-wrapping/models"
-	"github.com/lghtr35/llm-wrapping/services"
+	"github.com/lghtr35/llm-wrap/models"
+	"github.com/lghtr35/llm-wrap/services"
 )
 
 type CommandHandler struct {

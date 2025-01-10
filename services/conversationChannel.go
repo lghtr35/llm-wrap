@@ -2,7 +2,7 @@ package services
 
 import (
 	"github.com/google/uuid"
-	"github.com/lghtr35/llm-wrapping/models"
+	"github.com/lghtr35/llm-wrap/models"
 )
 
 type ConversationChannel struct {

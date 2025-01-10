@@ -6,25 +6,25 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/lghtr35/llm-wrapping/components"
-	"github.com/lghtr35/llm-wrapping/models"
+	"github.com/lghtr35/llm-wrap/components"
+	"github.com/lghtr35/llm-wrap/models"
 )
 
 type ConversationService struct {
 	promptGenerator *components.PromptGenerator
-	// Can be an array of LlmClient too but for simplicity I am using 3 different clients
-	llm1 *components.LlmClient
-	llm2 *components.LlmClient
-	llm3 *components.LlmClient
+	// Can be an array of OpenAiClient too but for simplicity I am using 3 different clients
+	llm1 *components.OpenAiClient
+	llm2 *components.OpenAiClient
+	llm3 *components.OpenAiClient
 }
 
 func NewConversationService(vendorConfig models.VendorConfig) *ConversationService {
 	return &ConversationService{
 		promptGenerator: components.NewPromptGenerator(vendorConfig),
 		// can be initialized with different vendorConfigs but for simplicity I am using the same config
-		llm1: components.NewLlmClient(vendorConfig),
-		llm2: components.NewLlmClient(vendorConfig),
-		llm3: components.NewLlmClient(vendorConfig),
+		llm1: components.NewOpenAiClient(vendorConfig),
+		llm2: components.NewOpenAiClient(vendorConfig),
+		llm3: components.NewOpenAiClient(vendorConfig),
 	}
 }
 
@@ -45,13 +45,8 @@ func (s *ConversationService) GenerateConversation(convoChannel ConversationChan
 	purpose := temp[1]
 
 	complexPrompt := s.promptGenerator.GenerateComplexPrompt(analysis, purpose, summary)
-	openAiPrompt := models.OpenAIPrompt{
-		Prompt:              complexPrompt,
-		MaxCompletionTokens: 1024,
-		Stream:              true,
-	}
 	convoChannel.StatusUpdate(models.LLM3_STARTED)
-	reader, err := s.llm3.GenerateTextAsStream(openAiPrompt)
+	reader, err := s.llm3.GenerateTextAsStream(complexPrompt)
 	if err != nil {
 		convoChannel.FullUpdate(models.ERROR, err.Error())
 		return err
@@ -76,14 +71,9 @@ func (s *ConversationService) getSentimentAnalysis(convoChannel ConversationChan
 	defer wg.Done()
 	payload := convoChannel.Payload()
 	sentimentAnalysisPrompt := s.promptGenerator.GenerateSentimentAnalysisPrompt(payload)
-	openAiPrompt := models.OpenAIPrompt{
-		Prompt:              sentimentAnalysisPrompt,
-		MaxCompletionTokens: 1024,
-		Stream:              false,
-	}
 	convoChannel.StatusUpdate(models.LLM1_STARTED)
 	var err error
-	*result, err = s.llm1.GenerateText(openAiPrompt)
+	*result, err = s.llm1.GenerateText(sentimentAnalysisPrompt)
 	if err != nil {
 		convoChannel.FullUpdate(models.ERROR, err.Error())
 		return
@@ -95,14 +85,9 @@ func (s *ConversationService) getSummary(convoChannel ConversationChannel, resul
 	defer wg.Done()
 	payload := convoChannel.Payload()
 	summaryPrompt := s.promptGenerator.GenerateSummarizePrompt(payload)
-	openAiPrompt := models.OpenAIPrompt{
-		Prompt:              summaryPrompt,
-		MaxCompletionTokens: 1024,
-		Stream:              false,
-	}
 	convoChannel.StatusUpdate(models.LLM2_STARTED)
 	var err error
-	*result, err = s.llm2.GenerateText(openAiPrompt)
+	*result, err = s.llm2.GenerateText(summaryPrompt)
 	if err != nil {
 		convoChannel.FullUpdate(models.ERROR, err.Error())
 		return
