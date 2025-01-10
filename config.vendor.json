@@ -1,0 +1,7 @@
+{
+  "OpenAI": {
+    "name": "OpenAI",
+    "base_url": "https://api.openai.com/v1",
+    "api_key": "ex-ample12345"
+  }
+}
