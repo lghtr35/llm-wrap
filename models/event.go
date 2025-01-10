@@ -33,6 +33,8 @@ func (s Status) String() string {
 		return "LLM3 started"
 	case LLM3_FINISHED:
 		return "LLM3 finished"
+	case ERROR:
+		return "Error"
 	default:
 		return "Unknown status"
 	}

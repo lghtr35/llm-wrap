@@ -2,6 +2,7 @@ package main
 
 import (
 	"io"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -20,6 +21,7 @@ func NewCommandHandler(vendorConfigs map[string]models.VendorConfig) *CommandHan
 }
 
 func (h *CommandHandler) Handle(c *gin.Context) {
+	log.Println("Received a command")
 	var request models.CommandRequest
 	err := c.ShouldBind(&request)
 	if err != nil {
@@ -28,14 +30,12 @@ func (h *CommandHandler) Handle(c *gin.Context) {
 	}
 	conversationChannel := services.NewConversationChannel(request.Prompt)
 
-	err = h.conversationService.GenerateConversation(conversationChannel)
-	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
+	go h.conversationService.GenerateConversation(conversationChannel)
+
 	c.Stream(func(w io.Writer) bool {
 		if event, ok := <-conversationChannel.Channel(); ok {
-			c.SSEvent("status", event.Status)
+			log.Println("Streaming a conversation")
+			c.SSEvent("status", event.Status.String())
 			c.SSEvent("conversation", event.Conversation)
 			return true
 		}

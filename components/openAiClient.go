@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"log"
 	"net/http"
 
 	"github.com/lghtr35/llm-wrap/models"
@@ -20,6 +21,7 @@ func NewOpenAiClient(config models.VendorConfig) *OpenAiClient {
 }
 
 func (c *OpenAiClient) GenerateText(payload models.Prompt) (string, error) {
+	log.Println("Requesting Generate Text from OpenAI")
 	actualPayload := models.OpenAIPrompt{
 		Prompt:              payload,
 		MaxCompletionTokens: 1024,
@@ -60,6 +62,7 @@ func (c *OpenAiClient) GenerateText(payload models.Prompt) (string, error) {
 }
 
 func (c *OpenAiClient) GenerateTextAsStream(payload models.Prompt) (io.Reader, error) {
+	log.Println("Requesting Generate Text As Stream from OpenAI")
 	actualPayload := models.OpenAIPrompt{
 		Prompt:              payload,
 		MaxCompletionTokens: 1024,

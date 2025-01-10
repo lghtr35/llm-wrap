@@ -2,7 +2,7 @@ package services
 
 import (
 	"encoding/json"
-	"errors"
+	"log"
 	"strings"
 	"sync"
 
@@ -28,7 +28,9 @@ func NewConversationService(vendorConfig models.VendorConfig) *ConversationServi
 	}
 }
 
-func (s *ConversationService) GenerateConversation(convoChannel ConversationChannel) error {
+func (s *ConversationService) GenerateConversation(convoChannel ConversationChannel) {
+	defer convoChannel.Close()
+	log.Println("Generating a conversation")
 	fullAnalysis := ""
 	summary := ""
 	wg := new(sync.WaitGroup)
@@ -37,7 +39,8 @@ func (s *ConversationService) GenerateConversation(convoChannel ConversationChan
 	go s.getSummary(convoChannel, &summary, wg)
 	wg.Wait()
 	if fullAnalysis == "" || summary == "" {
-		return errors.New("conversationService: fullAnalysis or summary is empty")
+		convoChannel.FullUpdate(models.ERROR, "conversationService: fullAnalysis or summary is empty")
+		return
 	}
 	convoChannel.StatusUpdate(models.COMBINING_ANSWERS)
 	temp := strings.Split(fullAnalysis, "\n")
@@ -49,7 +52,7 @@ func (s *ConversationService) GenerateConversation(convoChannel ConversationChan
 	reader, err := s.llm3.GenerateTextAsStream(complexPrompt)
 	if err != nil {
 		convoChannel.FullUpdate(models.ERROR, err.Error())
-		return err
+		return
 	}
 	decoder := json.NewDecoder(reader)
 	result := ""
@@ -64,11 +67,11 @@ func (s *ConversationService) GenerateConversation(convoChannel ConversationChan
 	}
 
 	convoChannel.FullUpdate(models.LLM3_FINISHED, result)
-	return nil
 }
 
 func (s *ConversationService) getSentimentAnalysis(convoChannel ConversationChannel, result *string, wg *sync.WaitGroup) {
 	defer wg.Done()
+	log.Println("Getting sentiment analysis")
 	payload := convoChannel.Payload()
 	sentimentAnalysisPrompt := s.promptGenerator.GenerateSentimentAnalysisPrompt(payload)
 	convoChannel.StatusUpdate(models.LLM1_STARTED)
@@ -83,6 +86,7 @@ func (s *ConversationService) getSentimentAnalysis(convoChannel ConversationChan
 
 func (s *ConversationService) getSummary(convoChannel ConversationChannel, result *string, wg *sync.WaitGroup) {
 	defer wg.Done()
+	log.Println("Getting summary")
 	payload := convoChannel.Payload()
 	summaryPrompt := s.promptGenerator.GenerateSummarizePrompt(payload)
 	convoChannel.StatusUpdate(models.LLM2_STARTED)
