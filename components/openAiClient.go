@@ -3,7 +3,7 @@ package components
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -20,12 +20,13 @@ func NewOpenAiClient(config models.VendorConfig) *OpenAiClient {
 	return &OpenAiClient{config: config, client: &http.Client{}}
 }
 
-func (c *OpenAiClient) GenerateText(payload models.Prompt) (string, error) {
+func (c *OpenAiClient) GenerateText(payload models.Prompt, responseFormat *models.ResponseFormat) (string, error) {
 	log.Println("Requesting Generate Text from OpenAI")
 	actualPayload := models.OpenAIPrompt{
 		Prompt:              payload,
 		MaxCompletionTokens: 1024,
 		Stream:              false,
+		ResponseFormat:      responseFormat,
 	}
 	buf, err := json.Marshal(actualPayload)
 	if err != nil {
@@ -55,18 +56,19 @@ func (c *OpenAiClient) GenerateText(payload models.Prompt) (string, error) {
 		return "", err
 	}
 	if len(resp.Choices) < 1 {
-		return "", errors.New("OpenAiClient: response is empty")
+		return "", fmt.Errorf("OpenAiClient: response is empty. response: %s", string(str))
 	}
 
 	return resp.Choices[0].Message.Content, nil
 }
 
-func (c *OpenAiClient) GenerateTextAsStream(payload models.Prompt) (io.Reader, error) {
+func (c *OpenAiClient) GenerateTextAsStream(payload models.Prompt, responseFormat *models.ResponseFormat) (io.ReadCloser, error) {
 	log.Println("Requesting Generate Text As Stream from OpenAI")
 	actualPayload := models.OpenAIPrompt{
 		Prompt:              payload,
 		MaxCompletionTokens: 1024,
 		Stream:              true,
+		ResponseFormat:      responseFormat,
 	}
 	buf, err := json.Marshal(actualPayload)
 	if err != nil {
@@ -78,6 +80,9 @@ func (c *OpenAiClient) GenerateTextAsStream(payload models.Prompt) (io.Reader, e
 		return nil, err
 	}
 	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Accept", "text/event-stream")
+	request.Header.Set("Cache-Control", "no-cache")
+	request.Header.Set("Connection", "keep-alive")
 	request.Header.Set("Authorization", "Bearer "+c.config.ApiKey)
 
 	response, err := c.client.Do(request)

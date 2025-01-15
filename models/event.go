@@ -31,6 +31,8 @@ func (s Status) String() string {
 		return "Combining answers"
 	case LLM3_STARTED:
 		return "LLM3 started"
+	case LLM3_STREAMING:
+		return "LLM3 streaming"
 	case LLM3_FINISHED:
 		return "LLM3 finished"
 	case ERROR:

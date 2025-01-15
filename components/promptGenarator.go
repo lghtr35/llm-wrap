@@ -20,7 +20,7 @@ func (g *PromptGenerator) GenerateSentimentAnalysisPrompt(payload string) models
 		Messages: []models.Message{
 			{
 				Role:    g.getDeveloperRole(),
-				Content: "Please give sentiment and purpose of the given message in a short and concise way and put each in their respective lines using \"\\n\" without any further explanation",
+				Content: "Please give sentiment and purpose of the given message in a short and concise way without any further explanation",
 			},
 			{
 				Role:    "user",

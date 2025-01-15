@@ -7,11 +7,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/lghtr35/llm-wrap/models"
+	"github.com/lghtr35/llm-wrap/handlers"
 )
 
 func main() {
 	vendorConfigs := readConfiguration()
-	handler := NewCommandHandler(vendorConfigs)
+	handler := handlers.NewCommandHandler(vendorConfigs)
 	s := gin.New()
 	api := s.Group("/v1/api")
 	{

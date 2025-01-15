@@ -1,0 +1,8 @@
+{
+  "OpenAI": {
+    "name": "OpenAI",
+    "url": "https://api.openai.com/v1/chat/completions",
+    "api_key": "<api-key>",
+    "model": "gpt-4o-mini"
+  }
+}
