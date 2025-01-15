@@ -20,8 +20,11 @@ A basic LLM wrapping learning project aimed as serving as acai travel technical 
 
 API has one endpoint `/v1/api/command` which takes POST request with a json body where body schema is like:
 <br/>
-`json {
-    "prompt": "string"
-}`
+
+```json
+{
+  "prompt": "string"
+}
+```
 
 It produces server side events named as `status` and `conversation`.
