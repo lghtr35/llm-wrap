@@ -28,3 +28,14 @@ API has one endpoint `/v1/api/command` which takes POST request with a json body
 ```
 
 It produces server side events named as `status` and `conversation`.
+<br/>
+
+`status` is a string and `conversation` is a json object.
+
+```json
+"conversation":{
+    "context_id": "string",
+	"payload":   "string",
+	"response":  "string"
+}
+```

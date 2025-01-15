@@ -48,7 +48,7 @@ type ConversationEvent struct {
 }
 
 type Conversation struct {
-	ContextID string
-	Payload   string
-	Response  string
+	ContextID string `json:"context_id"`
+	Payload   string `json:"payload"`
+	Response  string `json:"response"`
 }
